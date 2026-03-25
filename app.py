@@ -546,14 +546,15 @@ else:
                     url="https://openrouter.ai/api/v1/chat/completions",
                     headers={"Authorization": f"Bearer {API_KEY}"},
                     json={
-                        "model": "qwen/qwen3-next-80b-a3b-instruct:free",
+                        "model": "openrouter/auto",
                         "messages": history + [{"role": "user", "content": prompt}],
                         "temperature": 1.3
                     },
                     timeout=30
                 )
                 response.raise_for_status()
-                raw_text = response.json()["choices"][0]["message"]["content"]
+                msg = response.json()["choices"][0]["message"]
+                raw_text = msg.get("content") or ""
                 for word in raw_text.split(" "):
                     full_response += word + " "
                     time.sleep(0.02)
