@@ -546,7 +546,7 @@ else:
                     url="https://openrouter.ai/api/v1/chat/completions",
                     headers={"Authorization": f"Bearer {API_KEY}"},
                     json={
-                        "model": "meta-llama/llama-3.2-3b-instruct:free",
+                        "model": "qwen/qwen3-next-80b-a3b-instruct:free",
                         "messages": history + [{"role": "user", "content": prompt}],
                         "temperature": 1.3
                     },
