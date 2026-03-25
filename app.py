@@ -546,7 +546,7 @@ else:
                     url="https://openrouter.ai/api/v1/chat/completions",
                     headers={"Authorization": f"Bearer {API_KEY}"},
                     json={
-                        "model": "deepseek/deepseek-chat-v3-0324",
+                        "model": "meta-llama/llama-3.2-3b-instruct:free",
                         "messages": history + [{"role": "user", "content": prompt}],
                         "temperature": 1.3
                     },
