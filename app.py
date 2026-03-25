@@ -439,7 +439,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 CORRECT_PASSWORD = os.environ.get("SRIHARI_PASSWORD", "yashwantlikestaashvi")
-API_KEY = "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"
+API_KEY = "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"
 
 # ─── LOGIN ─────────────────────────────────────────────────────────────────────
 if not st.session_state.logged_in:
