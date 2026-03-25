@@ -453,7 +453,7 @@ if not st.session_state.logged_in:
     st.markdown("""
     <div class="pw-header">
         <div class="pw-name">Srihari A.</div>
-        <div class="pw-sub">⚠️ Authorized personnel only<br>Violations escalated to ChatGPT</div>
+        <div class="pw-sub">⚠️ Authorized personnel only<br>Retard</div>
     </div>
     """, unsafe_allow_html=True)
 
