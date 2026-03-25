@@ -459,7 +459,7 @@ if not st.session_state.logged_in:
 
     username = st.text_input("", placeholder="What should he call you?",
                              key="uname_input", label_visibility="collapsed")
-    password = st.text_input("", placeholder="Password (hint: his name)",
+    password = st.text_input("", placeholder="Password (hint: a couple)",
                              type="password", key="pw_input", label_visibility="collapsed")
 
     st.markdown("<div class='color-label'>Your profile color</div>", unsafe_allow_html=True)
