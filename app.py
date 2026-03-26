@@ -543,27 +543,24 @@ else:
 
             try:
                 response = requests.post(
-                url="https://openrouter.ai/v1/chat/completions",
-                headers={"Authorization": f"Bearer {API_KEY}"},
-                json={
-                    "model": "meta-llama/llama-3.3-70b-instruct:free",
-                    "messages": history + [{"role": "user", "content": prompt}],
-                    "temperature": 1.3
-                },
-                timeout=30
-            )
-            response.raise_for_status()
-            raw_text = response.json()["choices"][0]["message"]["content"]
- 
-
-            raw_text = msg.get("content") or ""
-            for word in raw_text.split(" "):
-                full_response += word + " "
-                time.sleep(0.02)
-                placeholder.markdown(full_response + "▌")
-            placeholder.markdown(full_response.strip())
-            st.session_state.messages.append(
-                {"role": "assistant", "content": full_response.strip()})
+                    url="https://openrouter.ai/api/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {API_KEY}"},
+                    json={
+                        "model": "meta-llama/llama-3.3-70b-instruct:free",
+                        "messages": history + [{"role": "user", "content": prompt}],
+                        "temperature": 1.3
+                    },
+                    timeout=30
+                )
+                response.raise_for_status()
+                raw_text = response.json()["choices"][0]["message"]["content"]
+                for word in raw_text.split(" "):
+                    full_response += word + " "
+                    time.sleep(0.02)
+                    placeholder.markdown(full_response + "▌")
+                placeholder.markdown(full_response.strip())
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": full_response.strip()})
             except Exception as e:
                 err = f"Srihari is dealing with a technicality. ({e})"
                 placeholder.markdown(err)
