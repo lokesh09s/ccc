@@ -439,7 +439,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 CORRECT_PASSWORD = os.environ.get("SRIHARI_PASSWORD", "yashwantlikestaashvi")
-API_KEY = "sk-0HRI2uff9iKLZAOFkCpi1kF6tzq8mGQGzrG44a70Mg6RgSwd"
+API_KEY = os.environ.get("API_KEY", "")
 
 # ─── LOGIN ─────────────────────────────────────────────────────────────────────
 if not st.session_state.logged_in:
@@ -543,10 +543,10 @@ else:
 
             try:
                 response = requests.post(
-                url="https://agentrouter.org/v1/chat/completions",
+                url="https://openrouter.ai/v1/chat/completions",
                 headers={"Authorization": f"Bearer {API_KEY}"},
                 json={
-                    "model": "claude-3-5-sonnet",
+                    "model": "meta-llama/llama-3.3-70b-instruct:free",
                     "messages": history + [{"role": "user", "content": prompt}],
                     "temperature": 1.3
                 },
