@@ -543,7 +543,7 @@ else:
 
             try:
                 response = requests.post(
-                    url="https://agentrouter.org/",
+                    url="https://agentrouter.org/v1/chat/completions",
                     headers={"Authorization": f"Bearer {API_KEY}"},
                     json={
                         "model": "deepseek-v3.2",
