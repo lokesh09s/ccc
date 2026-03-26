@@ -439,7 +439,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 CORRECT_PASSWORD = os.environ.get("SRIHARI_PASSWORD", "yashwantlikestaashvi")
-API_KEY = "sk-rSPkDgl9Wi9xqUr4XF4sCkrF1ZbrMPsjYA7sygPOy1eHzpYs"
+API_KEY = "sk-0HRI2uff9iKLZAOFkCpi1kF6tzq8mGQGzrG44a70Mg6RgSwd"
 
 # ─── LOGIN ─────────────────────────────────────────────────────────────────────
 if not st.session_state.logged_in:
@@ -543,17 +543,19 @@ else:
 
             try:
                 response = requests.post(
-                    url="https://agentrouter.org/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {API_KEY}"},
-                    json={
-                        "model": "deepseek-v3.2",
-                        "messages": history + [{"role": "user", "content": prompt}],
-                        "temperature": 1.3
-                    },
-                    timeout=30
-                )
-                response.raise_for_status()
-                msg = response.json()["choices"][0]["message"]
+                url="https://agentrouter.org/v1/chat/completions",
+                headers={"Authorization": f"Bearer {API_KEY}"},
+                json={
+                    "model": "claude-3-5-sonnet",
+                    "messages": history + [{"role": "user", "content": prompt}],
+                    "temperature": 1.3
+                },
+                timeout=30
+            )
+            response.raise_for_status()
+            raw_text = response.json()["choices"][0]["message"]["content"]
+            st.write(f"DEBUG: {response.status_code} — {response.text[:300]}")
+
                 raw_text = msg.get("content") or ""
                 for word in raw_text.split(" "):
                     full_response += word + " "
