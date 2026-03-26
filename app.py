@@ -546,7 +546,7 @@ else:
                     url="https://openrouter.ai/api/v1/chat/completions",
                     headers={"Authorization": f"Bearer {API_KEY}"},
                     json={
-                        "model": "openrouter/auto",
+                        "model": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
                         "messages": history + [{"role": "user", "content": prompt}],
                         "temperature": 1.3
                     },
