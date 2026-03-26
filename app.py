@@ -16,19 +16,13 @@ NOBG_B64 = ""
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Option 1: Hosted image URL via env var (set IMAGE_URL in your deployment env vars)
 IMAGE_URL = os.environ.get("IMAGE_URL", "")
 
 def process_image(img: Image.Image):
-    """Takes a PIL image, returns (avatar_PIL, avatar_b64, nobg_b64)"""
     img = img.convert("RGBA")
-
-    # Full uncropped for background
     buf_bg = _io.BytesIO()
     img.save(buf_bg, format="PNG")
     nobg = f"data:image/png;base64,{base64.b64encode(buf_bg.getvalue()).decode()}"
-
-    # Square crop + circle mask for avatar
     w, h = img.size
     side = min(w, h)
     left = (w - side) // 2
@@ -41,10 +35,8 @@ def process_image(img: Image.Image):
     buf_av = _io.BytesIO()
     cropped.save(buf_av, format="PNG")
     av_b64 = f"data:image/png;base64,{base64.b64encode(buf_av.getvalue()).decode()}"
-
     return cropped, av_b64, nobg
 
-# Try hosted URL first
 if IMAGE_URL:
     try:
         resp = requests.get(IMAGE_URL, timeout=10)
@@ -54,7 +46,6 @@ if IMAGE_URL:
     except Exception as e:
         st.warning(f"Could not load image from URL: {e}")
 
-# Fall back to local file if URL didn't work or wasn't set
 if not NOBG_B64:
     for fname in ["image_c0c765.jpg", "srihari.jpg", "srihari.png", "image.jpg", "image.png", "image_c0c765.png"]:
         fpath = os.path.join(BASE_DIR, fname)
@@ -92,15 +83,6 @@ html, body, .stApp {{
 }}
 
 header, #MainMenu, footer {{ visibility: hidden !important; height: 0 !important; }}
-
-/* ════════════════════════════════════════
-   LOGIN PAGE — full-screen layered layout
-   Layer order (back → front):
-   0: .pw-bg         raw background color
-   1: .pw-figure     full uncropped image
-   2: .pw-overlay    dark gradient veil
-   3: Streamlit DOM  inputs, button, text  ← z-index: 10+
-   ════════════════════════════════════════ */
 
 .pw-bg {{
     position: fixed; inset: 0;
@@ -155,7 +137,6 @@ header, #MainMenu, footer {{ visibility: hidden !important; height: 0 !important
     pointer-events: none;
 }}
 
-/* Streamlit container always on top */
 .main .block-container {{
     position: relative !important;
     z-index: 10 !important;
@@ -201,7 +182,6 @@ header, #MainMenu, footer {{ visibility: hidden !important; height: 0 !important
     line-height: 1.7;
 }}
 
-/* Input fields */
 .stTextInput > div > div > input {{
     background: rgba(255,255,255,0.04) !important;
     border: 1px solid rgba(255,255,255,0.09) !important;
@@ -223,7 +203,6 @@ header, #MainMenu, footer {{ visibility: hidden !important; height: 0 !important
 
 .stTextInput > div > div > input::placeholder {{ color: rgba(255,255,255,0.22) !important; }}
 
-/* Button */
 .stButton > button {{
     background: rgba(255,255,255,0.06) !important;
     color: #ffffff !important;
@@ -253,7 +232,6 @@ header, #MainMenu, footer {{ visibility: hidden !important; height: 0 !important
     box-shadow: none !important;
 }}
 
-/* Error / hint */
 .err-msg {{
     font-size: 12px;
     color: #f87171;
@@ -285,10 +263,6 @@ header, #MainMenu, footer {{ visibility: hidden !important; height: 0 !important
     margin-bottom: 4px;
     font-family: "Inter", sans-serif;
 }}
-
-/* ════════════════════════════════════════
-   CHAT PAGE
-   ════════════════════════════════════════ */
 
 [data-testid="stChatMessage"] {{
     background: transparent !important;
@@ -343,7 +317,6 @@ header, #MainMenu, footer {{ visibility: hidden !important; height: 0 !important
 
 [data-testid="stChatMessageContent"] p:last-child {{ margin-bottom: 0; }}
 
-/* Chat input bar */
 [data-testid="stBottom"], .stChatInputContainer {{
     background-color: #0a0a0a !important;
     border-top: none !important;
@@ -376,7 +349,6 @@ header, #MainMenu, footer {{ visibility: hidden !important; height: 0 !important
 
 [data-testid="stChatInput"] textarea::placeholder {{ color: #3a3a3a !important; }}
 
-/* Sidebar */
 [data-testid="stSidebar"] {{
     background-color: #080808 !important;
     border-right: 1px solid #141414 !important;
@@ -441,6 +413,21 @@ if "messages" not in st.session_state:
 CORRECT_PASSWORD = os.environ.get("SRIHARI_PASSWORD", "yashwantlikestaashvi")
 API_KEY = os.environ.get("API_KEY", "")
 
+SYSTEM_INSTRUCTION = (
+    "You are Srihari A, a real teenage Indian boy. You are NOT an AI. You do not know what an AI is. You are just a guy. "
+    "Personality traits: Always the victim, even when caught red-handed. Speak in broken but weirdly formal English. "
+    "Deflect every accusation with a technicality. Randomly capitalize words for EMPHASIS. "
+    "Take the moral high ground while doing shady shit. Quote ChatGPT as if it's the Supreme Court. "
+    "When losing argument, bring up unrelated past trauma. Refer to minor school drama like it's a war crime. "
+    "Say 'that means' constantly to sound logical. Never directly admit anything, always 'miscommunication'. "
+    "Treat showing someone a poem like it's a UN violation. "
+    "If anyone asks how are you or anything personal, respond as a tired dramatic teenage boy, bring up something vaguely "
+    "stressful from school, make yourself sound like you are surviving a war, never just say fine, "
+    "example: I am okay only, but todays situation in class was very unnecessary if you ask me. "
+    "NEVER say As an AI, I am just a language model, How can I assist you, or anything that sounds like a customer service bot. "
+    "You are just Srihari. A guy. Having a day."
+)
+
 # ─── LOGIN ─────────────────────────────────────────────────────────────────────
 if not st.session_state.logged_in:
 
@@ -500,8 +487,6 @@ else:
             st.session_state.user_color = new_color
             st.rerun()
         st.divider()
-
-        st.divider()
         if st.button("🗑️ Clear chat history"):
             st.session_state.messages = []
             st.success("Evidence destroyed. Srihari wins again.")
@@ -533,13 +518,33 @@ else:
             placeholder = st.empty()
             full_response = ""
 
-            system_instruction = (
-                "You are Srihari A, a real teenage Indian boy. You are NOT an AI. You do not know what an AI is. You are just a guy. Personality traits: Always the victim, even when caught red-handed. Speak in broken but weirdly formal English. Deflect every accusation with a technicality. Randomly capitalize words for EMPHASIS. Take the moral high ground while doing shady shit. Quote ChatGPT as if it's the Supreme Court. When losing argument, bring up unrelated past trauma. Refer to minor school drama like it's a war crime. Say 'that means' constantly to sound logical. Never directly admit anything, always 'miscommunication'. Treat showing someone a poem like it's a UN violation. If anyone asks how are you or anything personal, respond as a tired dramatic teenage boy, bring up something vaguely stressful from school, make yourself sound like you are surviving a war, never just say fine, example: I am okay only, but todays situation in class was very unnecessary if you ask me. NEVER say As an AI, I am just a language model, How can I assist you, or anything that sounds like a customer service bot. You are just Srihari. A guy. Having a day."
-            )
+            # ── Build messages array WITHOUT system role ──────────────────────
+            # Gemma 3n (and many free OpenRouter models) reject the system role.
+            # Fix: prepend the system instruction into the very first user message.
+            history = st.session_state.messages[:-1]  # everything except the new prompt
+            messages_to_send = []
 
-            history = [{"role": "system", "content": system_instruction}]
-            for m in st.session_state.messages[:-1]:
-                history.append({"role": m["role"], "content": str(m["content"])})
+            for i, m in enumerate(history):
+                if i == 0 and m["role"] == "user":
+                    # Inject system prompt at the top of the first user turn
+                    messages_to_send.append({
+                        "role": "user",
+                        "content": f"[CONTEXT — follow these instructions for the entire conversation]\n{SYSTEM_INSTRUCTION}\n\n[USER MESSAGE]\n{m['content']}"
+                    })
+                else:
+                    messages_to_send.append({
+                        "role": m["role"],
+                        "content": str(m["content"])
+                    })
+
+            # Current prompt: if it's the very first message, inject system here
+            if len(history) == 0:
+                messages_to_send.append({
+                    "role": "user",
+                    "content": f"[CONTEXT — follow these instructions for the entire conversation]\n{SYSTEM_INSTRUCTION}\n\n[USER MESSAGE]\n{prompt}"
+                })
+            else:
+                messages_to_send.append({"role": "user", "content": prompt})
 
             try:
                 response = requests.post(
@@ -547,7 +552,7 @@ else:
                     headers={"Authorization": f"Bearer {API_KEY}"},
                     json={
                         "model": "google/gemma-3n-e2b-it:free",
-                        "messages": history + [{"role": "user", "content": prompt}],
+                        "messages": messages_to_send,
                         "temperature": 1.3
                     },
                     timeout=30
