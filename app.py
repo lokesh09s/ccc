@@ -500,7 +500,7 @@ else:
             st.session_state.user_color = new_color
             st.rerun()
         st.divider()
-        st.file_uploader("Upload evidence against him", type=["png", "jpg", "jpeg"])
+
         st.divider()
         if st.button("🗑️ Clear chat history"):
             st.session_state.messages = []
