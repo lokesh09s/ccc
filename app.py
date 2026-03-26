@@ -546,7 +546,7 @@ else:
                     url="https://openrouter.ai/api/v1/chat/completions",
                     headers={"Authorization": f"Bearer {API_KEY}"},
                     json={
-                        "model": "openai/gpt-oss-20b:free",
+                        "model": "openrouter/auto",
                         "messages": history + [{"role": "user", "content": prompt}],
                         "temperature": 1.3
                     },
