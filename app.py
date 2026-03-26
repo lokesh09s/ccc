@@ -439,7 +439,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 CORRECT_PASSWORD = os.environ.get("SRIHARI_PASSWORD", "yashwantlikestaashvi")
-API_KEY = "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"
+API_KEY = "sk-rSPkDgl9Wi9xqUr4XF4sCkrF1ZbrMPsjYA7sygPOy1eHzpYs"
 
 # ─── LOGIN ─────────────────────────────────────────────────────────────────────
 if not st.session_state.logged_in:
@@ -543,10 +543,10 @@ else:
 
             try:
                 response = requests.post(
-                    url="https://openrouter.ai/api/v1/chat/completions",
+                    url="https://agentrouter.org/",
                     headers={"Authorization": f"Bearer {API_KEY}"},
                     json={
-                        "model": "openrouter/auto",
+                        "model": "deepseek-v3.2",
                         "messages": history + [{"role": "user", "content": prompt}],
                         "temperature": 1.3
                     },
