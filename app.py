@@ -552,18 +552,18 @@ else:
                 },
                 timeout=30
             )
-                response.raise_for_status()
-                raw_text = response.json()["choices"][0]["message"]["content"]
-                st.write(f"DEBUG: {response.status_code} — {response.text[:300]}")
+            response.raise_for_status()
+            raw_text = response.json()["choices"][0]["message"]["content"]
+ 
 
-                raw_text = msg.get("content") or ""
-                for word in raw_text.split(" "):
-                    full_response += word + " "
-                    time.sleep(0.02)
-                    placeholder.markdown(full_response + "▌")
-                placeholder.markdown(full_response.strip())
-                st.session_state.messages.append(
-                    {"role": "assistant", "content": full_response.strip()})
+            raw_text = msg.get("content") or ""
+            for word in raw_text.split(" "):
+                full_response += word + " "
+                time.sleep(0.02)
+                placeholder.markdown(full_response + "▌")
+            placeholder.markdown(full_response.strip())
+            st.session_state.messages.append(
+                {"role": "assistant", "content": full_response.strip()})
             except Exception as e:
                 err = f"Srihari is dealing with a technicality. ({e})"
                 placeholder.markdown(err)
