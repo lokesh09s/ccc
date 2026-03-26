@@ -552,9 +552,9 @@ else:
                 },
                 timeout=30
             )
-            response.raise_for_status()
-            raw_text = response.json()["choices"][0]["message"]["content"]
-            st.write(f"DEBUG: {response.status_code} — {response.text[:300]}")
+                response.raise_for_status()
+                raw_text = response.json()["choices"][0]["message"]["content"]
+                st.write(f"DEBUG: {response.status_code} — {response.text[:300]}")
 
                 raw_text = msg.get("content") or ""
                 for word in raw_text.split(" "):
