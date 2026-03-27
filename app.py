@@ -539,7 +539,7 @@ else:
                     url="https://openrouter.ai/api/v1/chat/completions",
                     headers={"Authorization": f"Bearer {API_KEY}"},
                     json={
-                        "model": "google/gemma-3n-e2b-it:free",
+                        "model": "nvidia/nemotron-nano-12b-v2-vl:free",
                         "messages": messages_to_send,
                         "temperature": 1.3
                     },
