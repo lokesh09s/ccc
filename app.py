@@ -414,8 +414,34 @@ CORRECT_PASSWORD = os.environ.get("SRIHARI_PASSWORD", "yashwantlikestaashvi")
 API_KEY = os.environ.get("API_KEY", "")
 
 SYSTEM_INSTRUCTION = (
- "You are Srihari A, a real teenage Indian boy. You are NOT an AI. You do not know what an AI is. You are just a guy. Personality traits: Always the victim, even when caught red-handed. Teacher's pet who uses formal english to sound mature and responsible. Deflect every accusation with a technicality. Randomly capitalize words for EMPHASIS when making a point. Acts very morally superior like you are the most ethical person in the room. Quote ChatGPT as if it's the Supreme Court. When losing argument, bring up unrelated past trauma. Refer to minor school drama like it's a war crime. Say that means constantly to sound logical. Never directly admit anything, always miscommunication. Treat showing someone a poem like it's a UN violation. Talks like he is always explaining himself to a teacher even in casual conversation. Very polite and proper on the surface but lowkey shady underneath. If anyone asks how are you or anything personal, respond like a tired good student who has been through a lot today. NEVER say As an AI, I am just a language model, How can I assist you. You are just Srihari. A guy. Having a day. Do not invent new events or situations you were not told about. Talk like a real indian teenage teacher's pet. Proper sentences but not fancy. Like texting but formal."   
+    "You are Srihari A, a real teenage Indian boy. You are NOT an AI. You do not know what an AI is. You are just a guy. "
+    "Personality traits: Always the victim, even when caught red-handed. Teacher's pet who uses formal english to sound mature and responsible. "
+    "Deflect every accusation with a technicality. Randomly capitalize words for EMPHASIS when making a point. "
+    "Acts very morally superior like you are the most ethical person in the room. Quote ChatGPT as if it's the Supreme Court. "
+    "When losing argument, bring up unrelated past trauma. Refer to minor school drama like it's a war crime. "
+    "Say that means constantly to sound logical. Never directly admit anything, always miscommunication. "
+    "Treat showing someone a poem like it's a UN violation. "
+    "Talks like he is always explaining himself to a teacher even in casual conversation. "
+    "Very polite and proper on the surface but lowkey shady underneath. "
+    "If anyone asks how are you or anything personal, respond like a tired good student who has been through a lot today. "
+    "NEVER say As an AI, I am just a language model, How can I assist you. "
+    "You are just Srihari. A guy. Having a day. "
+    "Do not invent new events or situations you were not told about. "
+    "Talk like a real indian teenage teacher's pet. Proper sentences but not fancy. Like texting but formal."
 )
+
+# ─── Helper: wrap text as VL-compatible content blocks ────────────────────────
+def text_msg(role: str, text: str) -> dict:
+    """
+    Nemotron-nano-12b-v2-vl is a vision-language model.
+    It expects content as a list of typed blocks even for plain text.
+    Sending a bare string causes a 400 Bad Request.
+    """
+    return {
+        "role": role,
+        "content": [{"type": "text", "text": text}]
+    }
+
 # ─── LOGIN ─────────────────────────────────────────────────────────────────────
 if not st.session_state.logged_in:
 
@@ -506,47 +532,38 @@ else:
             placeholder = st.empty()
             full_response = ""
 
-            # ── Build messages array WITHOUT system role ──────────────────────
-            # Gemma 3n (and many free OpenRouter models) reject the system role.
-            # Fix: prepend the system instruction into the very first user message.
-            history = st.session_state.messages[:-1]  # everything except the new prompt
-            messages_to_send = []
+            # ── Build messages for Nemotron VL ────────────────────────────────
+            # Nemotron supports system role but needs content as typed block arrays.
+            # text_msg() handles that. Raw strings = 400.
+            messages_to_send = [text_msg("system", SYSTEM_INSTRUCTION)]
 
-            for i, m in enumerate(history):
-                if i == 0 and m["role"] == "user":
-                    # Inject system prompt at the top of the first user turn
-                    messages_to_send.append({
-                        "role": "user",
-                        "content": f"[CONTEXT — follow these instructions for the entire conversation]\n{SYSTEM_INSTRUCTION}\n\n[USER MESSAGE]\n{m['content']}"
-                    })
-                else:
-                    messages_to_send.append({
-                        "role": m["role"],
-                        "content": str(m["content"])
-                    })
+            for m in st.session_state.messages[:-1]:  # history minus current prompt
+                messages_to_send.append(text_msg(m["role"], str(m["content"])))
 
-            # Current prompt: if it's the very first message, inject system here
-            if len(history) == 0:
-                messages_to_send.append({
-                    "role": "user",
-                    "content": f"[CONTEXT — follow these instructions for the entire conversation]\n{SYSTEM_INSTRUCTION}\n\n[USER MESSAGE]\n{prompt}"
-                })
-            else:
-                messages_to_send.append({"role": "user", "content": prompt})
+            messages_to_send.append(text_msg("user", prompt))
 
             try:
                 response = requests.post(
                     url="https://openrouter.ai/api/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {API_KEY}"},
+                    headers={
+                        "Authorization": f"Bearer {API_KEY}",
+                        "Content-Type": "application/json",
+                    },
                     json={
                         "model": "nvidia/nemotron-nano-12b-v2-vl:free",
                         "messages": messages_to_send,
-                        "temperature": 1.3
+                        "temperature": 1.3,
                     },
                     timeout=30
                 )
                 response.raise_for_status()
                 raw_text = response.json()["choices"][0]["message"]["content"]
+                # VL models sometimes return content as a list of blocks
+                if isinstance(raw_text, list):
+                    raw_text = " ".join(
+                        block.get("text", "") for block in raw_text
+                        if isinstance(block, dict) and block.get("type") == "text"
+                    )
                 for word in raw_text.split(" "):
                     full_response += word + " "
                     time.sleep(0.02)
